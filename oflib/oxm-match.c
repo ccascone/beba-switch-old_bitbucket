@@ -461,6 +461,8 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             ofl_structs_match_put32m(match, f->header, ntohl(*((uint32_t*) value)), ntohl(*((uint32_t*) mask)));
             return 0;
         }
+        /* TCP flags.  */
+        case OFI_OXM_OF_TCP_FLAGS:
         /* TCP header. */
         case OFI_OXM_OF_TCP_SRC:
         case OFI_OXM_OF_TCP_DST:
@@ -471,6 +473,14 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         case OFI_OXM_OF_SCTP_SRC:
         case OFI_OXM_OF_SCTP_DST:{
             ofl_structs_match_put16(match, f->header, ntohs(*((uint16_t*) value)));
+            return 0;
+        }
+        /* Wildcarded version of the TCP flags */
+        case OFI_OXM_OF_TCP_FLAGS_W:{
+            if (check_bad_wildcard16(*((uint16_t*) value), *((uint16_t*) mask))){
+                return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_WILDCARDS);
+            }
+            ofl_structs_match_put16m(match, f->header, ntohs(*((uint16_t*) value)),ntohs(*((uint16_t*) mask)));
             return 0;
         }
             /* ICMP header. */

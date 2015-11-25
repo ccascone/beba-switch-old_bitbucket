@@ -299,6 +299,13 @@ int nblink_extract_proto_fields(struct ofpbuf * pktin, _nbPDMLField * field, str
             m_value = m_value & IPV6_FLABEL_MASK;
             ofl_structs_match_put32(pktout, header, m_value);
         }
+        else if (header == OXM_OF_TCP_FLAGS){
+            uint16_t m_value;
+            sscanf(field->Value,"%x",&m_value);
+            // Mask the extracted data - there are 9 flags in total
+            m_value = m_value & 0x1ff ;
+            ofl_structs_match_put16(pktout, header, m_value);
+        }
     }
     else
     {
@@ -563,6 +570,8 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct ofl_match * pk
                 nblink_extract_proto_fields(pktin, field, pktout, OXM_OF_TCP_SRC);
                 PDMLReader->GetPDMLField(proto->Name, (char*) "dport", proto->FirstField, &field);
                 nblink_extract_proto_fields(pktin, field, pktout, OXM_OF_TCP_DST);
+                PDMLReader->GetPDMLField(proto->Name,(char*) "flags", proto->FirstField, &field);
+                nblink_extract_proto_fields(pktin, field, pktout, OXM_OF_TCP_FLAGS);
             }
             else if (protocol_Name.compare("udp") == 0 && pkt_proto->udp == NULL)
             {
