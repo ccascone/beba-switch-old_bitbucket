@@ -228,7 +228,7 @@ struct ofl_exp_msg_notify_state_change {
 
 /* State Sync: Notify the controller about a flow change. */
 struct ofl_exp_msg_notify_flow_change {
-    struct ofl_exp_beba_msg_multipart_reply    header;
+    struct   ofl_exp_beba_msg_header header;
 
     uint32_t ntf_type;
     uint32_t table_id;
@@ -276,7 +276,7 @@ int
 ofl_exp_beba_msg_pack(struct ofl_msg_experimenter const *msg, uint8_t **buf, size_t *buf_len, struct ofl_exp const *exp);
 
 ofl_err
-ofl_exp_beba_msg_unpack(struct ofp_header const *oh, size_t *len, struct ofl_msg_experimenter **msg);
+ofl_exp_beba_msg_unpack(struct ofp_header const *oh, size_t *len, struct ofl_msg_experimenter **msg, struct ofl_exp const *exp);
 
 int
 ofl_exp_beba_msg_free(struct ofl_msg_experimenter *msg);
