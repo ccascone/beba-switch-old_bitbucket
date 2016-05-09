@@ -394,13 +394,13 @@ ofl_exp_beba_msg_unpack(struct ofp_header const *oh, size_t *len, struct ofl_msg
             }
 
             data = (uint32_t * )(sm + ROUND_UP(sizeof(struct ofp_exp_msg_flow_ntf)-4 + dm->match->length, 8));
-            dm->instruction_num = htonl(*data);
+            dm->instruction_num = ntohl(*data);
 
             if (dm->instruction_num>0) {
                 dm->instructions = malloc(dm->instruction_num*sizeof(uint32_t));
                 data++;
                 for(i=0; i<(dm->instruction_num); i++){
-                    dm->instructions[i] = htonl(*data);
+                    dm->instructions[i] = ntohl(*data);
                     data++;
                 }
              } else {
