@@ -63,7 +63,6 @@ AC_SUBST(KARCH)
 
 # BEBA options
 
-AC_DEFINE(SKIP_TRILL,            1,   [BEBA skip TRILL encapsulation])
 AC_DEFINE(BEBA_USE_LIBPCAP,         1,   [BEBA pcap packet I/O acceleration])
 AC_DEFINE(BEBA_USE_LIBPCAP_ZEROCOPY,1,   [BEBA zero-copy using pcap buffers])
 AC_DEFINE(BEBA_WORK_BUDGET,         64,  [BEBA work budget for batch I/O acceleration])
