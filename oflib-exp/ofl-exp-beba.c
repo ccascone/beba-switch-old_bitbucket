@@ -120,13 +120,8 @@ ofl_structs_extraction_unpack(struct ofp_exp_set_extractor const *src, size_t *l
        return ofl_error(OFPET_EXPERIMENTER, OFPEC_BAD_EXP_LEN);
     }
 
-//<<<<<<< HEAD
-//    *len -= (((1+ntohl(src->field_count))*sizeof(uint32_t)) + 4*sizeof(uint8_t));
-//
-//=======
     *len -= (((1+ntohl(src->field_count))*sizeof(uint32_t)) + 4*sizeof(uint8_t) + 4*sizeof(uint8_t));
  
-//>>>>>>> cesnet-mod
     return 0;
 }
 
@@ -750,16 +745,9 @@ ofl_exp_beba_act_free(struct ofl_action_header *act)
             free(a);
             break;
         }
-//<<<<<<< HEAD
         default: {
             OFL_LOG_WARN(LOG_MODULE, "Trying to free unknown Beba Experimenter action.");
         }
-//=======
-//	default:
-//	{
-//	    free(act);
-//	} 
-//>>>>>>> cesnet-mod
     }
     return 0;
 }
@@ -1959,10 +1947,6 @@ ofl_err state_table_set_state(struct state_table *table, struct packet *pkt,
         hard_rollback = act->hard_rollback;
         idle_timeout = act->idle_timeout;
         hard_timeout = act->hard_timeout;
-//<<<<<<< HEAD
-//
-//        if(!__extract_key(key, &table->write_key, pkt)){
-//=======
        
         // Extract the key regarding to set bit value in the set-state message
         struct key_extractor* key_extractor_ptr;
@@ -1977,7 +1961,6 @@ ofl_err state_table_set_state(struct state_table *table, struct packet *pkt,
 
         //Extract the key
         if(!__extract_key(key, key_extractor_ptr, pkt)){
-//>>>>>>> cesnet-mod
             OFL_LOG_DBG(LOG_MODULE, "lookup key fields not found in the packet's header");
             return res;
         }
