@@ -54,7 +54,7 @@ int packet_parse(struct packet const *pkt, struct ofl_match *m, struct protocols
 {
 	size_t offset = 0;
 	uint16_t eth_type = 0x0000;
-        uint8_t next_proto = 0;
+	uint8_t next_proto = 0;
 
 	/* Resets all protocol fields to NULL */
 
@@ -433,6 +433,7 @@ int packet_parse(struct packet const *pkt, struct ofl_match *m, struct protocols
         return -1;
 }
 
+
 void
 packet_handle_std_validate(struct packet_handle_std *handle) {
 
@@ -469,13 +470,15 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
 
     HMAP_FOR_EACH_SAFE(iter, next, struct ofl_match_tlv, hmap_node, &handle->match.match_fields)
     {
-        free(iter->value);
-        free(iter);
+    	if (iter->ownership) {
+			free(iter->value);
+			free(iter);
+		}
     }
 
     ofl_structs_match_init(&handle->match);
 
-    if (packet_parse(handle->pkt, &handle->match, handle->proto) < 0)
+    if (packet_parse(handle->pkt, &handle->match, &handle->proto) < 0)
         return;
 
     handle->valid = true;
@@ -496,32 +499,54 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
     ofl_structs_match_put64(&handle->match,  OXM_OF_TUNNEL_ID, tunnel_id);
 }
 
-struct packet_handle_std *
-packet_handle_std_create(struct packet *pkt) {
-	struct packet_handle_std *handle = xmalloc(sizeof(struct packet_handle_std));
-	handle->proto = xmalloc(sizeof(struct protocols_std));
+
+void
+packet_handle_std_init(struct packet_handle_std *handle, struct packet *pkt)
+{
+	// FLAT 
+	// handle->proto = xmalloc(sizeof(struct protocols_std));
+
 	handle->pkt = pkt;
 
 	hmap_init(&handle->match.match_fields);
 
 	handle->valid = false;
 	packet_handle_std_validate(handle);
+}
 
+
+struct packet_handle_std *
+packet_handle_std_create(struct packet *pkt)
+{
+	struct packet_handle_std *handle = xmalloc(sizeof(struct packet_handle_std));
+	// FLAT 
+	// handle->proto = xmalloc(sizeof(struct protocols_std));
+
+	handle->pkt = pkt;
+
+	hmap_init(&handle->match.match_fields);
+
+	handle->valid = false;
+	packet_handle_std_validate(handle);
 	return handle;
 }
 
+
 struct packet_handle_std *
-packet_handle_std_clone(struct packet *pkt, struct packet_handle_std *handle UNUSED) {
+packet_handle_std_clone(struct packet *pkt, struct packet_handle_std *handle UNUSED)
+{
     struct packet_handle_std *clone = xmalloc(sizeof(struct packet_handle_std));
 
-    clone->pkt = pkt;
-    clone->proto = xmalloc(sizeof(struct protocols_std));
-    hmap_init(&clone->match.match_fields);
-    clone->valid = false;
-    // TODO Zoltan: if handle->valid, then match could be memcpy'd, and protocol
-    //              could be offset
-    packet_handle_std_validate(clone);
+    // FLAT
+    // clone->proto = xmalloc(sizeof(struct protocols_std));
+    //
 
+    clone->pkt = pkt;
+
+    hmap_init(&clone->match.match_fields);
+
+    clone->valid = false;
+    packet_handle_std_validate(clone);
     return clone;
 }
 
@@ -529,27 +554,35 @@ void
 packet_handle_std_destroy(struct packet_handle_std *handle) {
 
     struct ofl_match_tlv * iter, *next;
+
     HMAP_FOR_EACH_SAFE(iter, next, struct ofl_match_tlv, hmap_node, &handle->match.match_fields){
-        free(iter->value);
-        free(iter);
+    	if (iter->ownership) {
+			free(iter->value);
+			free(iter);
+		}
     }
-    free(handle->proto);
+
+    // FLAT 
+    // free(handle->proto);
+
     hmap_destroy(&handle->match.match_fields);
-    free(handle);
+
+    // FLAT
+    // free(handle);
 }
 
 bool
 packet_handle_std_is_ttl_valid(struct packet_handle_std *handle) {
     packet_handle_std_validate(handle);
 
-    if (handle->proto->mpls != NULL) {
-        uint32_t ttl = ntohl(handle->proto->mpls->fields) & MPLS_TTL_MASK;
+    if (handle->proto.mpls != NULL) {
+        uint32_t ttl = ntohl(handle->proto.mpls->fields) & MPLS_TTL_MASK;
         if (ttl <= 1) {
             return false;
         }
     }
-    if (handle->proto->ipv4 != NULL) {
-        if (handle->proto->ipv4->ip_ttl < 1) {
+    if (handle->proto.ipv4 != NULL) {
+        if (handle->proto.ipv4->ip_ttl < 1) {
             return false;
         }
     }
@@ -561,8 +594,8 @@ packet_handle_std_is_fragment(struct packet_handle_std *handle) {
     packet_handle_std_validate(handle);
 
     return false;
-    /*return ((handle->proto->ipv4 != NULL) &&
-            IP_IS_FRAGMENT(handle->proto->ipv4->ip_frag_off));*/
+    /*return ((handle->proto.ipv4 != NULL) &&
+            IP_IS_FRAGMENT(handle->proto.ipv4->ip_frag_off));*/
 }
 
 
@@ -612,7 +645,7 @@ packet_handle_std_print(FILE *stream, struct packet_handle_std *handle) {
     packet_handle_std_validate(handle);
 
     fprintf(stream, "{proto=");
-    proto_print(stream, handle->proto);
+    proto_print(stream, &handle->proto);
 
     fprintf(stream, ", match=");
     ofl_structs_match_print(stream, (struct ofl_match_header *)(&handle->match), handle->pkt->dp->exp);
