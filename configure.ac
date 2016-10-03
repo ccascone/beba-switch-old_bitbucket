@@ -62,10 +62,20 @@ AC_ARG_VAR(KARCH, [Kernel Architecture String])
 AC_SUBST(KARCH)
 
 # BEBA options
-
 AC_DEFINE(BEBA_USE_LIBPCAP,      1,   [BEBA pcap packet I/O acceleration])
 AC_DEFINE(BEBA_WORK_BUDGET,      128, [BEBA work budget for batch I/O acceleration])
 AC_DEFINE(BEBA_CTRL_PLANE_RELAX, 10,  [BEBA control-plane relax factor])
+
+# Add the parameter to configure script
+AC_MSG_CHECKING(--enable-skiptrill argument)
+AC_ARG_ENABLE(skiptrill,
+    [  --enable-skiptrill         Enable skipping of TRILL protocol.],
+    [enable_skiptrill=$enableval],
+    [enable_skiptrill="no"])
+AC_MSG_RESULT($enable_skiptrill)
+if test "$enable_skiptrill" = "yes"; then
+  AC_DEFINE(SKIP_TRILL, [], [Skip TRILL protocol])
+fi
 
 #OFP_CHECK_LINUX(l26, 2.6, KBLD26, KSRC26, L26_ENABLED)
 
