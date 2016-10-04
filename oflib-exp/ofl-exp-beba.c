@@ -2130,7 +2130,6 @@ ofl_err state_table_set_state(struct state_table *table, struct packet *pkt,
 
                 return res;
             }
-        return 0;
     }
 
     gettimeofday(&tv,NULL);
